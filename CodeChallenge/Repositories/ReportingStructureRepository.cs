@@ -1,8 +1,6 @@
 ﻿using CodeChallenge.Data;
 using CodeChallenge.Models;
-using CodeChallenge.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 
@@ -19,7 +17,10 @@ namespace CodeChallenge.Repositories
 
         public ReportingStructure GetByEmployeeId(String id)
         {
+            //Get the employee from the DB. Here I tried to perform a query that did not bring the list
+            //of direct reports like in the GetEmployee
             Employee employee = _employeeContext.Employees.SingleOrDefault(i => i.EmployeeId == id);
+            //Include the list of direct reports so we can traverse the required lists
             int numberOfReports = GetTotalReports(_employeeContext.Employees.Include(e => e.DirectReports).SingleOrDefault(e => e.EmployeeId == id));
             return new ReportingStructure
             {
@@ -30,6 +31,7 @@ namespace CodeChallenge.Repositories
 
         public int GetTotalReports(Employee employee)
         {
+            //Start count in 0 check if null to avoid unnecessary calls
             int count = 0;
             if (employee.DirectReports == null)
             {
@@ -38,8 +40,10 @@ namespace CodeChallenge.Repositories
             else
             {
                 count += employee.DirectReports.Count;
+                //Go through the direct reports list of the current employee
                 foreach (Employee emp in employee.DirectReports)
                 {
+                    //Recursion call to traverse the necessary sublists
                     count += GetTotalReports(_employeeContext.Employees.Include(e => e.DirectReports).SingleOrDefault(e => e.EmployeeId == emp.EmployeeId));
                 }
                 return count;

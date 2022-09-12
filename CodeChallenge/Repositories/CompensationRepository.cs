@@ -18,6 +18,7 @@ namespace CodeChallenge.Repositories
         public Compensation Add(Compensation compensation)
         {
             compensation.CompensationId = Guid.NewGuid().ToString();
+            //Use include to avoid an exception where it seems we are trying to add a duplicate employee
             compensation.Employee = _employeeContext.Employees.FirstOrDefault(e => e.EmployeeId == compensation.Employee.EmployeeId);
             _employeeContext.Compensations.Add(compensation);
             return compensation;
